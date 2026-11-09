@@ -4,6 +4,8 @@ import { SiteHeader, SiteFooter, ArrowIcon } from "./components/layout/SiteLayou
 import Preloader from "./components/layout/Preloader.jsx";
 import MotionEffects from "./components/animations/MotionEffects.jsx";
 import RobotFace from "./components/RobotFace.jsx";
+import CareersPage from "./components/CareersPage.jsx";
+import CareerApplicationPage from "./components/CareerApplicationPage.jsx";
 
 const services = [
   {
@@ -400,7 +402,7 @@ function HomePage() {
               <div className="testimonial-name">
                 <img src="/logos/Appen%20(2).svg" alt="Appen logo" />
               </div>
-              <blockquote>I’ve had the pleasure of working with Appen on several projects, and I’ve always been impressed by their professionalism and dedication to delivering top-quality AI training data. They are a trusted partner who I continually look to for new opportunities.</blockquote>
+              <blockquote>I’ve had the pleasure of working with DatoviaPlayHouse, and it has been a wonderful experience. Their team is professional, supportive, and committed to delivering quality work. I truly appreciate their dedication and look forward to future collaborations.”</blockquote>
             </div>
           </div>
         </section>
@@ -453,34 +455,6 @@ function AboutPage() {
         </div>
       </section>
       <section className="inner-cta section-wrap"><h2>Have a good question?<br /><span>Let’s talk.</span></h2><Link className="button button-dark" to="/contact">Contact us <ArrowIcon diagonal /></Link></section>
-    </main>
-  );
-}
-
-function CareersPage() {
-  return (
-    <main className="inner-page">
-      <section className="inner-hero section-wrap">
-        <div className="eyebrow"><span className="status-dot" /> CAREERS / GROW WITH US</div>
-        <h1>Bring your curiosity.<br /><span>Make things clearer.</span></h1>
-        <p>We value thoughtful people who enjoy solving meaningful problems and making complex things easier to understand.</p>
-      </section>
-      <section className="careers-content section-wrap">
-        <div className="careers-intro">
-          <div className="eyebrow">HOW WE WORK</div>
-          <h2>Good work is a<br /><span>team effort.</span></h2>
-          <p>Our culture is built around open minds, shared ownership, and continuous learning. We make space for different perspectives and care about the impact of what we create.</p>
-          <div className="culture-tags"><span>Collaborative</span><span>People-first</span><span>Always learning</span></div>
-        </div>
-        <div className="careers-visual" aria-hidden="true"><div className="careers-orbit orbit-a" /><div className="careers-orbit orbit-b" /><div className="careers-orbit orbit-c" /><span>GOOD IDEAS<br />COME FROM<br /><b>GOOD PEOPLE.</b></span></div>
-      </section>
-      <section className="open-roles section-wrap">
-        <div className="eyebrow">OPPORTUNITIES</div>
-        <div className="open-roles-card">
-          <div><h2>Let’s start a conversation.</h2><p>There are no specific openings listed here right now. If you’re interested in working with us, send an introduction and a link to your work.</p></div>
-          <a className="button button-dark" href="mailto:hello@datoviaplayhouse.com?subject=Careers%20at%20Datovia%20Playhouse">Introduce yourself <ArrowIcon diagonal /></a>
-        </div>
-      </section>
     </main>
   );
 }
@@ -1240,6 +1214,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="careers" element={<CareersPage />} />
+          <Route path="careers/apply" element={<CareerApplicationPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="solutions" element={<SolutionsPage />} />
           <Route path="blog" element={<BlogPage />} />
