@@ -1,12 +1,54 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { API_URL, API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
 
 export default function CareerApplicationPage() {
   const [submissionMessage, setSubmissionMessage] = useState("");
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSubmissionMessage("This form is not connected to a submission service yet. Your application has not been sent.");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setSubmissionMessage("Submitting application...");
+
+    try {
+      if (!API_URL) throw new Error(API_URL_REQUIRED_MESSAGE);
+
+      const response = await fetch(
+        `${API_URL}/api/applications`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.get("name"),
+            email: formData.get("email"),
+            phone: formData.get("phone"),
+            resumeUrl: formData.get("resumeUrl"),
+          }),
+        }
+      );
+
+      const responseText = await response.text();
+      let result;
+
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `Server returned an invalid response (HTTP ${response.status}). Check that the backend is running and the API URL is correct.`
+        );
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Could not submit your application.");
+      }
+
+      form.reset();
+      setSubmissionMessage("Your application was submitted successfully.");
+    } catch (error) {
+      setSubmissionMessage(error.message || "Could not connect to the server.");
+    }
   }
 
   return (
@@ -32,12 +74,12 @@ export default function CareerApplicationPage() {
             <input id="applicant-phone" name="phone" type="tel" autoComplete="tel" required />
           </div>
           <div className="form-field">
-            <label htmlFor="applicant-resume">Resume</label>
+            <label htmlFor="applicant-resume">Google Drive resume link</label>
             <input
               id="applicant-resume"
-              name="resume"
-              type="file"
-              accept=".pdf,.doc,.docx"
+              name="resumeUrl"
+              type="url"
+              placeholder="https://drive.google.com/file/d/..."
               required
             />
           </div>

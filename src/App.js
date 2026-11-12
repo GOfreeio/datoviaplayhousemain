@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Link, Outlet, Route, useLocation, Routes } from "react-router-dom";
 import { SiteHeader, SiteFooter, ArrowIcon } from "./components/layout/SiteLayout.jsx";
 import Preloader from "./components/layout/Preloader.jsx";
@@ -6,6 +6,8 @@ import MotionEffects from "./components/animations/MotionEffects.jsx";
 import RobotFace from "./components/RobotFace.jsx";
 import CareersPage from "./components/CareersPage.jsx";
 import CareerApplicationPage from "./components/CareerApplicationPage.jsx";
+import AdminDashboard from "./components/AdminDashboard.jsx";
+import { API_URL, API_URL_REQUIRED_MESSAGE } from "./apiConfig.js";
 
 const services = [
   {
@@ -460,17 +462,48 @@ function AboutPage() {
 }
 
 function ContactPage() {
-  function handleContactSubmit(event) {
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+
+  async function handleContactSubmit(event) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
-    const fullName = formData.get("fullName");
-    const emailAddress = formData.get("emailAddress");
-    const subject = formData.get("subject");
-    const message = formData.get("message");
-    const body = `Name: ${fullName}\nEmail: ${emailAddress}\n\n${message}`;
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
-    window.location.href = `mailto:hello@datoviaplayhouse.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setSubmitting(true);
+    setFeedback({ type: "", message: "" });
+
+    try {
+      if (!API_URL) throw new Error(API_URL_REQUIRED_MESSAGE);
+
+      const response = await fetch(`${API_URL}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("fullName"),
+          email: formData.get("emailAddress"),
+          subject: formData.get("subject"),
+          message: formData.get("message"),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Could not send your message.");
+      }
+
+      form.reset();
+      setFeedback({ type: "success", message: "Thanks! Your message has been sent." });
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        message: error.message || "Could not connect to the server. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -485,7 +518,7 @@ function ContactPage() {
           <div className="contact-page-copy">
             <div className="eyebrow">SAY HELLO</div>
             <h2>Tell us what’s<br /><span>on your mind.</span></h2>
-            <p>Share a little about what you’re working on. Your email app will open with your message ready to send.</p>
+            <p>Share a little about what you’re working on and our team will get back to you.</p>
             <form className="contact-form" onSubmit={handleContactSubmit}>
               <div className="form-field">
                 <label htmlFor="contact-full-name">Full name</label>
@@ -503,8 +536,17 @@ function ContactPage() {
                 <label htmlFor="contact-message">Message</label>
                 <textarea id="contact-message" name="message" rows="5" placeholder="Tell us a little about your project..." required />
               </div>
-              <button className="button button-dark form-submit" type="submit">Prepare email <ArrowIcon diagonal /></button>
-              <p className="form-note">This form opens your default email app; it does not send or store your information on this website.</p>
+              {feedback.message && (
+                <p className={`form-note ${feedback.type}`} role="status" aria-live="polite">
+                  {feedback.message}
+                </p>
+              )}
+              <button className="button button-dark form-submit" type="submit" disabled={submitting}>
+                {submitting ? "Sending..." : "Send message"} <ArrowIcon diagonal />
+              </button>
+              <p className="form-note">
+                Your message will be sent securely and saved for the team to review.
+              </p>
             </form>
           </div>
           <div className="contact-page-side">
@@ -1210,6 +1252,7 @@ function App() {
       <MotionEffects />
       <ScrollToTop />
       <Routes>
+        <Route path="admin" element={<AdminDashboard apiUrl={API_URL} />} />
         <Route element={<><SiteHeader /><Outlet /><SiteFooter /></>}>
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />
