@@ -7,6 +7,7 @@ import RobotFace from "./components/RobotFace.jsx";
 import CareersPage from "./components/CareersPage.jsx";
 import CareerApplicationPage from "./components/CareerApplicationPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
+import BlogPage from "./components/BlogPage.jsx";
 import { VITE_API_URL, VITE_API_URL_REQUIRED_MESSAGE } from "./apiConfig.js";
 
 const services = [
@@ -1034,26 +1035,6 @@ function TermsPage() {
       description="The terms governing access to and use of the Datovia Playhouse website."
       sections={termsSections}
     />
-  );
-}
-
-function BlogPage() {
-  return (
-    <main className="inner-page content-page">
-      <section className="inner-hero section-wrap">
-        <div className="eyebrow"><span className="status-dot" /> DATOVIA PLAYHOUSE / IDEAS</div>
-        <h1>Blog</h1>
-        <p>Notes and perspectives on data, AI, technology, and the people who make them useful.</p>
-      </section>
-      <section className="section-wrap content-page-body">
-        <article className="content-notice">
-          <span className="eyebrow">COMING SOON</span>
-          <h2>We’re working on our first stories.</h2>
-          <p>There aren’t any articles published yet. In the meantime, tell us what you’re working on and what you’d like to learn about.</p>
-          <Link className="text-link" to="/contact">Talk with our team <ArrowIcon /></Link>
-        </article>
-      </section>
-    </main>
   );
 }
 
