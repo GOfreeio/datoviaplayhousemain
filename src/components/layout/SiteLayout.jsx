@@ -46,6 +46,7 @@ export function SiteHeader() {
           <a href="/#services" onClick={closeMenu}>Capabilities</a>
           <Link to="/about" onClick={closeMenu}>About</Link>
           <Link to="/careers" onClick={closeMenu}>Careers</Link>
+          <Link to="/blog" onClick={closeMenu}>Blog</Link>
           <Link className="nav-contact" to="/contact" onClick={closeMenu}>Contact <ArrowIcon diagonal /></Link>
         </nav>
       </div>

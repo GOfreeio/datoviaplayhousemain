@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { VITE_API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
+import { readApiJson, VITE_API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
 
 function getErrorMessage(result, fallback) {
   return typeof result?.message === "string" && result.message ? result.message : fallback;
@@ -22,6 +22,11 @@ function getApplicationRows(result) {
   if (Array.isArray(result?.data?.applications)) return result.data.applications;
 
   throw new Error("The server returned an unexpected applications response.");
+}
+
+function getCareerJobRows(result) {
+  if (Array.isArray(result?.data)) return result.data;
+  throw new Error("The server returned an unexpected career jobs response.");
 }
 
 function getContactValue(contact, keys) {
@@ -56,8 +61,14 @@ export default function AdminDashboard({ apiUrl }) {
   const [password, setPassword] = useState("");
   const [contacts, setContacts] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [careerJobs, setCareerJobs] = useState([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingApplications, setLoadingApplications] = useState(false);
+  const [loadingCareerJobs, setLoadingCareerJobs] = useState(false);
+  const [postingCareerJob, setPostingCareerJob] = useState(false);
+  const [deletingCareerJob, setDeletingCareerJob] = useState("");
+  const [careerJobError, setCareerJobError] = useState("");
+  const [careerJobMessage, setCareerJobMessage] = useState("");
   const [loginError, setLoginError] = useState("");
   const [contactsError, setContactsError] = useState("");
   const [applicationsError, setApplicationsError] = useState("");
@@ -68,6 +79,7 @@ export default function AdminDashboard({ apiUrl }) {
     if (!apiUrl) {
       setContactsError(VITE_API_URL_REQUIRED_MESSAGE);
       setApplicationsError(VITE_API_URL_REQUIRED_MESSAGE);
+      setCareerJobError(VITE_API_URL_REQUIRED_MESSAGE);
       return undefined;
     }
 
@@ -82,13 +94,14 @@ export default function AdminDashboard({ apiUrl }) {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal,
         });
-        const result = await response.json();
+        const result = await readApiJson(response, endpoint);
 
         if (response.status === 401 || response.status === 403) {
           window.sessionStorage.removeItem("adminToken");
           setToken("");
           setContacts([]);
           setApplications([]);
+          setCareerJobs([]);
           setLoginError("Your admin session has expired. Please sign in again.");
           return;
         }
@@ -130,10 +143,122 @@ export default function AdminDashboard({ apiUrl }) {
       );
     }
 
+    function loadCareerJobs() {
+      return loadList(
+        "/api/career-jobs",
+        getCareerJobRows,
+        "Could not load career openings.",
+        setCareerJobs,
+        setCareerJobError,
+        setLoadingCareerJobs
+      );
+    }
+
     loadContacts();
     loadApplications();
+    loadCareerJobs();
     return () => controller.abort();
   }, [apiUrl, token]);
+
+  async function handleCareerJobSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setCareerJobError("");
+    setCareerJobMessage("");
+    setPostingCareerJob(true);
+    const formData = new FormData(form);
+    const min = Number(formData.get("priceMin"));
+    const max = Number(formData.get("priceMax"));
+
+    try {
+      if (!apiUrl) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
+      if (min > max) throw new Error("Maximum pay must be greater than or equal to minimum pay.");
+
+      const response = await fetch(`${apiUrl}/api/career-jobs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.get("title"),
+          department: formData.get("department"),
+          location: formData.get("location"),
+          employmentType: formData.get("employmentType"),
+          description: formData.get("description"),
+          requirements: formData.get("requirements"),
+          price: {
+            min,
+            max,
+            currency: formData.get("currency"),
+            payPeriod: formData.get("payPeriod"),
+          },
+        }),
+      });
+      const result = await readApiJson(response, "POST /api/career-jobs");
+
+      if (response.status === 401 || response.status === 403) {
+        window.sessionStorage.removeItem("adminToken");
+        setToken("");
+        throw new Error("Your admin session has expired. Please sign in again.");
+      }
+
+      if (!response.ok || result?.success === false) {
+        throw new Error(getErrorMessage(result, "Could not post this career opening."));
+      }
+
+      if (!result?.data) throw new Error("The server did not return the posted career opening.");
+      setCareerJobs((currentJobs) => [result.data, ...currentJobs]);
+      form.reset();
+      setCareerJobMessage("Career opening posted successfully.");
+    } catch (error) {
+      setCareerJobError(error.message || "Could not post this career opening.");
+    } finally {
+      setPostingCareerJob(false);
+    }
+  }
+
+  async function handleCareerJobDelete(job) {
+    const jobId = job._id || job.id;
+    if (!jobId) {
+      setCareerJobError("This career opening cannot be deleted because it has no ID.");
+      return;
+    }
+    if (!window.confirm(`Delete the "${job.title}" career opening?`)) return;
+
+    setCareerJobError("");
+    setCareerJobMessage("");
+    setDeletingCareerJob(jobId);
+
+    try {
+      if (!apiUrl) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
+
+      const response = await fetch(`${apiUrl}/api/career-jobs/${encodeURIComponent(jobId)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await readApiJson(response, "DELETE /api/career-jobs/:id");
+
+      if (response.status === 401 || response.status === 403) {
+        window.sessionStorage.removeItem("adminToken");
+        setToken("");
+        throw new Error("Your admin session has expired. Please sign in again.");
+      }
+
+      if (!response.ok || result?.success === false) {
+        throw new Error(getErrorMessage(result, "Could not delete this career opening."));
+      }
+
+      setCareerJobs((currentJobs) => currentJobs.filter((currentJob) => (
+        (currentJob._id || currentJob.id) !== jobId
+      )));
+      setCareerJobMessage("Career opening deleted successfully.");
+    } catch (error) {
+      setCareerJobError(error.message || "Could not delete this career opening.");
+    } finally {
+      setDeletingCareerJob("");
+    }
+  }
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -172,6 +297,8 @@ export default function AdminDashboard({ apiUrl }) {
     setApplications([]);
     setContactsError("");
     setApplicationsError("");
+    setCareerJobError("");
+    setCareerJobMessage("");
     setLoginError("");
   }
 
@@ -218,11 +345,126 @@ export default function AdminDashboard({ apiUrl }) {
       <header className="admin-heading">
         <div>
           <div className="eyebrow"><span className="status-dot" /> ADMIN DASHBOARD</div>
-          <h1>Submissions</h1>
-          <p>Review website contact messages and career applications.</p>
+          <h1>Admin dashboard</h1>
+          <p>Manage career openings, contact messages, and applications.</p>
         </div>
         <button className="admin-logout" type="button" onClick={handleLogout}>Sign out</button>
       </header>
+      <section className="admin-panel admin-applications-panel" aria-labelledby="post-career-heading">
+        <div className="admin-table-heading">
+          <h2 id="post-career-heading">Post a career opening</h2>
+        </div>
+        <form className="career-job-form" onSubmit={handleCareerJobSubmit}>
+          <div className="career-job-form-grid">
+            <div className="form-field">
+              <label htmlFor="career-job-title">Job title</label>
+              <input id="career-job-title" name="title" type="text" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-department">Department</label>
+              <input id="career-job-department" name="department" type="text" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-location">Location</label>
+              <input id="career-job-location" name="location" type="text" placeholder="Remote" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-type">Employment type</label>
+              <select id="career-job-type" name="employmentType" defaultValue="" required>
+                <option value="" disabled>Select employment type</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+            <div className="form-field career-job-form-wide">
+              <label htmlFor="career-job-description">Description</label>
+              <textarea id="career-job-description" name="description" rows="4" required />
+            </div>
+            <div className="form-field career-job-form-wide">
+              <label htmlFor="career-job-requirements">Requirements</label>
+              <textarea id="career-job-requirements" name="requirements" rows="4" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-price-min">Minimum pay</label>
+              <input id="career-job-price-min" name="priceMin" type="number" min="0" step="any" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-price-max">Maximum pay</label>
+              <input id="career-job-price-max" name="priceMax" type="number" min="0" step="any" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-currency">Currency</label>
+              <input id="career-job-currency" name="currency" type="text" defaultValue="USD" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="career-job-pay-period">Pay period</label>
+              <select id="career-job-pay-period" name="payPeriod" defaultValue="" required>
+                <option value="" disabled>Select pay period</option>
+                <option value="Hourly">Hourly</option>
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+            </div>
+          </div>
+          {careerJobError && <p className="admin-feedback admin-feedback-error" role="alert">{careerJobError}</p>}
+          {careerJobMessage && <p className="admin-feedback" role="status">{careerJobMessage}</p>}
+          <button className="button button-dark form-submit" type="submit" disabled={postingCareerJob}>
+            {postingCareerJob ? "Posting..." : "Post job"}
+          </button>
+        </form>
+      </section>
+      <section className="admin-panel admin-applications-panel" aria-labelledby="manage-careers-heading">
+        <div className="admin-table-heading">
+          <h2 id="manage-careers-heading">Posted career openings</h2>
+          {!loadingCareerJobs && !careerJobError && <span>{careerJobs.length} openings</span>}
+        </div>
+        {loadingCareerJobs && <p className="admin-feedback" role="status">Loading career openings...</p>}
+        {!loadingCareerJobs && careerJobs.length === 0 && !careerJobError && (
+          <p className="admin-feedback">No career openings posted yet.</p>
+        )}
+        {!loadingCareerJobs && careerJobs.length > 0 && (
+          <div className="admin-table-scroll">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th scope="col">Title</th>
+                  <th scope="col">Department</th>
+                  <th scope="col">Location</th>
+                  <th scope="col">Employment type</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {careerJobs.map((job, index) => {
+                  const jobId = job._id || job.id || `${job.title}-${index}`;
+                  return (
+                    <tr key={jobId}>
+                      <td>{job.title}</td>
+                      <td>{job.department}</td>
+                      <td>{job.location}</td>
+                      <td>{job.employmentType}</td>
+                      <td>
+                        <button
+                          className="admin-delete-button"
+                          type="button"
+                          onClick={() => handleCareerJobDelete(job)}
+                          disabled={deletingCareerJob === jobId}
+                        >
+                          {deletingCareerJob === jobId ? "Deleting..." : "Delete"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
       <section className="admin-panel" aria-labelledby="contact-responses-heading">
         <div className="admin-table-heading">
           <h2 id="contact-responses-heading">Contact submissions</h2>
