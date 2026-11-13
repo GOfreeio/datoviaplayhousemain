@@ -8,6 +8,7 @@ import CareersPage from "./components/CareersPage.jsx";
 import CareerApplicationPage from "./components/CareerApplicationPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
 import BlogPage from "./components/BlogPage.jsx";
+import TestimonialCarousel from "./components/TestimonialCarousel.jsx";
 import { VITE_API_URL, VITE_API_URL_REQUIRED_MESSAGE } from "./apiConfig.js";
 
 const services = [
@@ -400,15 +401,8 @@ function HomePage() {
             <div className="contact-right">
               <div className="contact-orbit" />
               <section className="testimonial-section">
-          <div className="section-wrap testimonial-inner">
-            <div className="testimonial-content" aria-label="Client testimonial">
-              <div className="testimonial-name">
-                <img src="/logos/Appen%20(2).svg" alt="Appen logo" />
-              </div>
-              <blockquote>I’ve had the pleasure of working with DatoviaPlayHouse, and it has been a wonderful experience. Their team is professional, supportive, and committed to delivering quality work. I truly appreciate their dedication and look forward to future collaborations.”</blockquote>
-            </div>
-          </div>
-        </section>
+                <TestimonialCarousel />
+              </section>
               <Link to="/contact" aria-label="Contact Datovia Playhouse"><ArrowIcon diagonal /></Link>
             </div>
           </div>

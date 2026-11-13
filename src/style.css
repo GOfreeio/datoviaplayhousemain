@@ -1167,6 +1167,7 @@ h1 span,
 .contact-right .testimonial-name img {
   width: 80px;
   max-height: 28px;
+  filter: brightness(0) invert(1);
 }
 
 .contact-right .testimonial-content blockquote {
@@ -1176,6 +1177,19 @@ h1 span,
   font-size: 13px;
   line-height: 1.5;
   letter-spacing: 0;
+  animation: testimonial-quote-enter 1.4s ease-in-out both;
+}
+
+@keyframes testimonial-quote-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .contact-right .testimonial-content blockquote::before,
@@ -1195,6 +1209,31 @@ h1 span,
 .contact-right .testimonial-content blockquote::after {
   content: "”";
   margin-left: .08em;
+}
+
+.testimonial-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.testimonial-indicator {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid #c5e9bd;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.testimonial-indicator.is-active {
+  background: #c5e9bd;
+}
+
+.testimonial-indicator:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 .site-footer {
