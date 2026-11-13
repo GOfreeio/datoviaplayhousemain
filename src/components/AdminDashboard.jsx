@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
+import { VITE_API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
 
 function getErrorMessage(result, fallback) {
   return typeof result?.message === "string" && result.message ? result.message : fallback;
@@ -66,8 +66,8 @@ export default function AdminDashboard({ apiUrl }) {
     if (!token) return undefined;
 
     if (!apiUrl) {
-      setContactsError(API_URL_REQUIRED_MESSAGE);
-      setApplicationsError(API_URL_REQUIRED_MESSAGE);
+      setContactsError(VITE_API_URL_REQUIRED_MESSAGE);
+      setApplicationsError(VITE_API_URL_REQUIRED_MESSAGE);
       return undefined;
     }
 
@@ -140,7 +140,7 @@ export default function AdminDashboard({ apiUrl }) {
     setLoginError("");
 
     try {
-      if (!apiUrl) throw new Error(API_URL_REQUIRED_MESSAGE);
+      if (!apiUrl) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
 
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",

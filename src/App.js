@@ -7,7 +7,7 @@ import RobotFace from "./components/RobotFace.jsx";
 import CareersPage from "./components/CareersPage.jsx";
 import CareerApplicationPage from "./components/CareerApplicationPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
-import { API_URL, API_URL_REQUIRED_MESSAGE } from "./apiConfig.js";
+import { VITE_API_URL, VITE_API_URL_REQUIRED_MESSAGE } from "./apiConfig.js";
 
 const services = [
   {
@@ -475,9 +475,9 @@ function ContactPage() {
     setFeedback({ type: "", message: "" });
 
     try {
-      if (!API_URL) throw new Error(API_URL_REQUIRED_MESSAGE);
+      if (!VITE_API_URL) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
 
-      const response = await fetch(`${API_URL}/api/contact`, {
+      const response = await fetch(`${VITE_API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1252,7 +1252,7 @@ function App() {
       <MotionEffects />
       <ScrollToTop />
       <Routes>
-        <Route path="admin" element={<AdminDashboard apiUrl={API_URL} />} />
+        <Route path="admin" element={<AdminDashboard apiUrl={VITE_API_URL} />} />
         <Route element={<><SiteHeader /><Outlet /><SiteFooter /></>}>
           <Route index element={<HomePage />} />
           <Route path="about" element={<AboutPage />} />

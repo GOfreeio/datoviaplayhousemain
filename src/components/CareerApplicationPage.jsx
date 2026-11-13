@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { API_URL, API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
+import { VITE_API_URL, VITE_API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
 
 export default function CareerApplicationPage() {
   const [submissionMessage, setSubmissionMessage] = useState("");
@@ -13,10 +13,10 @@ export default function CareerApplicationPage() {
     setSubmissionMessage("Submitting application...");
 
     try {
-      if (!API_URL) throw new Error(API_URL_REQUIRED_MESSAGE);
+      if (!VITE_API_URL) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
 
       const response = await fetch(
-        `${API_URL}/api/applications`,
+        `${VITE_API_URL}/api/applications`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
