@@ -47,7 +47,11 @@ export default function CareerApplicationPage() {
       form.reset();
       setSubmissionMessage("Your application was submitted successfully.");
     } catch (error) {
-      setSubmissionMessage(error.message || "Could not connect to the server.");
+      setSubmissionMessage(
+        error instanceof TypeError
+          ? "Could not reach the application server. Check VITE_API_URL, make sure the backend is running, and confirm its CORS settings allow this website."
+          : error.message || "Could not connect to the server."
+      );
     }
   }
 
