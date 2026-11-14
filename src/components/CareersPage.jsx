@@ -75,19 +75,13 @@ export default function CareersPage() {
         )}
         {!loading && !error && openings.map((opening) => (
           <article className="career-card" key={opening._id || opening.id || opening.title}>
-            <span className="career-card-category">{opening.department}</span>
             <h2>{opening.title}</h2>
             <div className="career-card-details">
               {[opening.location, opening.employmentType, formatPrice(opening.price)]
                 .filter(Boolean)
                 .map((detail) => <span key={detail}>{detail}</span>)}
             </div>
-            {opening.description && <p className="career-card-description">{opening.description}</p>}
-            {opening.requirements && (
-              <p className="career-card-requirements"><strong>Requirements:</strong> {opening.requirements}</p>
-            )}
             <div className="career-card-footer">
-              <span className="career-card-status">Open</span>
               <Link
                 className="career-card-view"
                 to={`/careers/apply?job=${encodeURIComponent(opening.title)}&jobId=${encodeURIComponent(opening._id || opening.id || "")}`}

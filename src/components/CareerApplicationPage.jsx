@@ -146,7 +146,6 @@ export default function CareerApplicationPage() {
           )}
           {listedJob ? (
             <>
-              <p className="career-description-lead career-job-long-description">{listedJob.description}</p>
               <p className="career-hours">
                 <strong>{listedJob.department}</strong>
                 {" · "}{listedJob.location}
@@ -155,9 +154,15 @@ export default function CareerApplicationPage() {
                   <>{" · "}{listedJob.price.min}–{listedJob.price.max} {listedJob.price.currency} {listedJob.price.payPeriod}</>
                 )}
               </p>
+              {listedJob.description && (
+                <section className="career-description-section" aria-labelledby="job-description-heading">
+                  <h2 id="job-description-heading">Description</h2>
+                  <p className="career-job-long-description">{listedJob.description}</p>
+                </section>
+              )}
               {listedJob.requirements && (
-                <section className="career-description-section">
-                  <h2>Requirements</h2>
+                <section className="career-description-section" aria-labelledby="job-requirements-heading">
+                  <h2 id="job-requirements-heading">Requirements</h2>
                   <p className="career-job-long-description">{listedJob.requirements}</p>
                 </section>
               )}
