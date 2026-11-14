@@ -55,6 +55,81 @@ function formatSubmittedDate(value) {
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
 }
 
+function formatApplicationAnswer(value) {
+  if (value === true || value === "Yes") return "Yes";
+  if (value === false || value === "No") return "No";
+  if (Array.isArray(value)) return value.length ? value.join(", ") : "—";
+  return value || "—";
+}
+
+function CareerApplicationCard({ application, index }) {
+  const resumeUrl = getSafeResumeUrl(application.resumeUrl);
+  const additionalLanguageExpertise = getContactValue(application, [
+    "additionalLanguageExpertiseDetails",
+    "additionalLanguageExpertise",
+  ]);
+  const additionalLanguageExpertiseDetails = (
+    additionalLanguageExpertise === "Yes" || additionalLanguageExpertise === "No"
+      ? "—"
+      : formatApplicationAnswer(additionalLanguageExpertise)
+  );
+  const submittedDate = formatSubmittedDate(getContactValue(
+    application,
+    ["createdAt", "created_at", "submittedAt"]
+  ));
+  const fields = [
+    { label: "Email address", value: getContactValue(application, ["email", "emailAddress"]) || "—" },
+    { label: "WhatsApp or contact number", value: getContactValue(application, ["phone"]) || "—" },
+    {
+      label: "Resume",
+      value: resumeUrl
+        ? <a href={resumeUrl} target="_blank" rel="noreferrer">Open Google Drive link</a>
+        : getContactValue(application, ["resumeUrl"]) || "—",
+    },
+    { label: "Location", value: getContactValue(application, ["location", "countryAndCity"]) || "—" },
+    { label: "Native language", value: getContactValue(application, ["nativeLanguage"]) || "—" },
+    { label: "Other languages", value: getContactValue(application, ["otherLanguages"]) || "—" },
+    { label: "Language proficiency", value: getContactValue(application, ["languageProficiency"]) || "—" },
+    {
+      label: "Additional language expertise",
+      value: formatApplicationAnswer(getContactValue(application, [
+        "hasAdditionalLanguageExpertise",
+        "additionalLanguageExpertise",
+      ])),
+    },
+    { label: "Expertise details", value: additionalLanguageExpertiseDetails },
+    {
+      label: "Project types",
+      value: formatApplicationAnswer(getContactValue(application, ["projectTypes", "interestedProjectTypes"])),
+    },
+    { label: "Professional expertise", value: getContactValue(application, ["professionalExpertise"]) || "—" },
+    {
+      label: "Relevant experience",
+      value: formatApplicationAnswer(getContactValue(application, ["hasRelevantExperience", "previousExperience"])),
+    },
+  ];
+
+  return (
+    <article
+      className="admin-application-card"
+      key={application._id || application.id || `${application.email || "application"}-${index}`}
+    >
+      <div className="admin-application-card-heading">
+        <h3>{getContactValue(application, ["name", "fullName"]) || "Applicant"}</h3>
+        <span>{submittedDate || "Submission date unavailable"}</span>
+      </div>
+      <dl className="admin-application-fields">
+        {fields.map((field) => (
+          <div key={field.label}>
+            <dt>{field.label}</dt>
+            <dd>{field.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
 export default function AdminDashboard({ apiUrl }) {
   const [token, setToken] = useState(() => window.sessionStorage.getItem("adminToken") || "");
   const [email, setEmail] = useState("");
@@ -513,39 +588,10 @@ export default function AdminDashboard({ apiUrl }) {
           <p className="admin-feedback">No career applications yet.</p>
         )}
         {!loadingApplications && !applicationsError && applications.length > 0 && (
-          <div className="admin-table-scroll">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Phone</th>
-                  <th scope="col">Resume</th>
-                  <th scope="col">Submitted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map((application, index) => {
-                  const resumeUrl = getSafeResumeUrl(application.resumeUrl);
-
-                  return (
-                    <tr key={application._id || application.id || `${application.email || "application"}-${index}`}>
-                      <td>{getContactValue(application, ["name", "fullName"])}</td>
-                      <td>{getContactValue(application, ["email", "emailAddress"])}</td>
-                      <td>{getContactValue(application, ["phone"])}</td>
-                      <td>
-                        {resumeUrl ? (
-                          <a href={resumeUrl} target="_blank" rel="noreferrer">View resume</a>
-                        ) : (
-                          getContactValue(application, ["resumeUrl"])
-                        )}
-                      </td>
-                      <td>{formatSubmittedDate(getContactValue(application, ["createdAt", "created_at", "submittedAt"]))}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="admin-application-list" aria-label="Career application records">
+            {applications.map((application, index) => (
+              <CareerApplicationCard application={application} index={index} key={application._id || application.id || `${application.email || "application"}-${index}`} />
+            ))}
           </div>
         )}
       </section>

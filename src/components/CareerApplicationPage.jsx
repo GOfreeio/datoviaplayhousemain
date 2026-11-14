@@ -43,6 +43,19 @@ const physicalRequirements = [
   "Ability to perform repetitive typing tasks with sustained concentration.",
 ];
 
+const projectTypes = [
+  "Data Collection",
+  "Audio Recording",
+  "Transcription",
+  "Translation",
+  "Localization",
+  "Data Annotation",
+  "AI/LLM Data Training",
+  "Quality Assurance (QA)",
+  "MTPE",
+  "Other",
+];
+
 export default function CareerApplicationPage() {
   const [submissionMessage, setSubmissionMessage] = useState("");
   const [searchParams] = useSearchParams();
@@ -91,6 +104,13 @@ export default function CareerApplicationPage() {
     setSubmissionMessage("Submitting application...");
 
     try {
+      const interestedProjectTypes = formData.getAll("projectTypes");
+
+      if (interestedProjectTypes.length === 0) {
+        setSubmissionMessage("Select at least one project type.");
+        return;
+      }
+
       if (!VITE_API_URL) throw new Error(VITE_API_URL_REQUIRED_MESSAGE);
 
       const response = await fetch(
@@ -103,6 +123,17 @@ export default function CareerApplicationPage() {
             email: formData.get("email"),
             phone: formData.get("phone"),
             resumeUrl: formData.get("resumeUrl"),
+            location: formData.get("countryAndCity"),
+            nativeLanguage: formData.get("nativeLanguage"),
+            otherLanguages: formData.get("otherLanguages"),
+            languageProficiency: formData.get("languageProficiency"),
+            hasAdditionalLanguageExpertise: formData.get("additionalLanguageExpertise") === "Yes",
+            additionalLanguageExpertise: String(
+              formData.get("additionalLanguageExpertiseDetails") || ""
+            ).trim(),
+            projectTypes: interestedProjectTypes,
+            professionalExpertise: formData.get("professionalExpertise"),
+            hasRelevantExperience: formData.get("previousExperience") === "Yes",
           }),
         }
       );
@@ -118,7 +149,7 @@ export default function CareerApplicationPage() {
         );
       }
 
-      if (!response.ok || !result.success) {
+      if (!response.ok || result?.success === false) {
         throw new Error(result.message || "Could not submit your application.");
       }
 
@@ -270,18 +301,18 @@ export default function CareerApplicationPage() {
 
         <section className="careers-application" aria-labelledby="application-heading">
           <h2 id="application-heading">Apply for {jobTitle}</h2>
-          <p className="career-form-intro">Share your contact details and resume with our team.</p>
+          <p className="career-form-intro">Tell us about your languages, experience, and project interests.</p>
           <form className="application-form" onSubmit={handleSubmit}>
             <div className="form-field">
               <label htmlFor="applicant-name">Full name</label>
               <input id="applicant-name" name="name" type="text" autoComplete="name" required />
             </div>
             <div className="form-field">
-              <label htmlFor="applicant-email">Email</label>
+              <label htmlFor="applicant-email">Email address</label>
               <input id="applicant-email" name="email" type="email" autoComplete="email" required />
             </div>
             <div className="form-field">
-              <label htmlFor="applicant-phone">Phone</label>
+              <label htmlFor="applicant-phone">WhatsApp or contact number</label>
               <input id="applicant-phone" name="phone" type="tel" autoComplete="tel" required />
             </div>
             <div className="form-field">
@@ -290,10 +321,84 @@ export default function CareerApplicationPage() {
                 id="applicant-resume"
                 name="resumeUrl"
                 type="url"
-                placeholder="https://drive.google.com/file/d/..."
+                placeholder="https://drive.google.com/..."
                 required
               />
             </div>
+            <div className="form-field">
+              <label htmlFor="applicant-location">Which country and city are you currently located in?</label>
+              <input
+                id="applicant-location"
+                name="countryAndCity"
+                type="text"
+                placeholder="For example: Dhubri, India"
+                required
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="applicant-native-language">What is your native language?</label>
+              <input id="applicant-native-language" name="nativeLanguage" type="text" required />
+            </div>
+            <div className="form-field">
+              <label htmlFor="applicant-other-languages">Which other languages do you speak?</label>
+              <textarea id="applicant-other-languages" name="otherLanguages" rows="3" placeholder="List any other languages you speak." />
+            </div>
+            <div className="form-field">
+              <label htmlFor="applicant-proficiency">What is your proficiency level in each language?</label>
+              <textarea
+                id="applicant-proficiency"
+                name="languageProficiency"
+                rows="3"
+                placeholder="For example: Hindi — native; English — advanced."
+                required
+              />
+            </div>
+            <fieldset className="form-choice-group">
+              <legend>Do you have any additional language expertise?</legend>
+              <div className="form-choice-options">
+                <label className="form-choice">
+                  <input type="radio" name="additionalLanguageExpertise" value="Yes" required />
+                  <span>Yes</span>
+                </label>
+                <label className="form-choice">
+                  <input type="radio" name="additionalLanguageExpertise" value="No" />
+                  <span>No</span>
+                </label>
+              </div>
+              <div className="form-field">
+                <label htmlFor="applicant-language-expertise-details">If yes, please specify.</label>
+                <textarea id="applicant-language-expertise-details" name="additionalLanguageExpertiseDetails" rows="3" />
+              </div>
+            </fieldset>
+            <fieldset className="form-choice-group">
+              <legend>Which types of projects are you interested in?</legend>
+              <p className="form-choice-hint">Select all that apply.</p>
+              <div className="form-choice-grid">
+                {projectTypes.map((projectType) => (
+                  <label className="form-choice" key={projectType}>
+                    <input type="checkbox" name="projectTypes" value={projectType} />
+                    <span>{projectType}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div className="form-field">
+              <label htmlFor="applicant-expertise">Which area best describes your professional expertise?</label>
+              <textarea id="applicant-expertise" name="professionalExpertise" rows="3" required />
+            </div>
+            <fieldset className="form-choice-group">
+              <legend>Do you have previous experience in AI, data collection, or language-related projects?</legend>
+              <div className="form-choice-options">
+                <label className="form-choice">
+                  <input type="radio" name="previousExperience" value="Yes" required />
+                  <span>Yes</span>
+                </label>
+                <label className="form-choice">
+                  <input type="radio" name="previousExperience" value="No" />
+                  <span>No</span>
+                </label>
+              </div>
+            </fieldset>
             <button className="button button-dark form-submit" type="submit">Submit application</button>
           </form>
           {submissionMessage && <p className="application-status" role="status">{submissionMessage}</p>}

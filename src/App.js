@@ -1236,6 +1236,7 @@ function App() {
           <Route path="contact" element={<ContactPage />} />
           <Route path="solutions" element={<SolutionsPage />} />
           <Route path="blog" element={<BlogPage />} />
+          <Route path="blog/:slug" element={<BlogPage />} />
           <Route path="case-studies" element={<CaseStudiesPage />} />
           <Route path="faq" element={<FaqPage />} />
           <Route path="supplier-code-of-conduct" element={<SupplierCodePage />} />
