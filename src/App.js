@@ -44,20 +44,20 @@ const services = [
 
 const projects = [
   {
-    type: "Customer intelligence",
-    title: "Seeing the whole customer journey",
+    type: "Multilingual AI data",
+    title: "Building language datasets for AI",
     tone: "project-blue",
     visual: "journey",
     description:
-      "A sample case-study layout. Add the real challenge, approach, evidence, and approved outcomes here.",
+      "We collect and prepare multilingual speech and text data, then annotate and review it against each project's language and delivery guidelines.",
   },
   {
-    type: "Data experience",
-    title: "Making complex information feel clear",
+    type: "Speech data & transcription",
+    title: "Preparing speech data for model training",
     tone: "project-green",
     visual: "signal",
     description:
-      "A sample case-study layout. Replace this copy with a verified project story and client-approved details.",
+      "From speaker recruitment and audio collection to transcription and quality checks, we help teams prepare consistent datasets for speech recognition and conversational AI.",
   },
 ];
 
@@ -273,10 +273,10 @@ function HomePage() {
         <section className="section-wrap work-section section-pad" id="work">
           <div className="section-heading">
             <div>
-              <div className="eyebrow">A SAMPLE OF WHAT WE DO</div>
-              <h2>Good questions.<br /><span>Better outcomes.</span></h2>
+              <div className="eyebrow">HOW WE SUPPORT AI TEAMS</div>
+              <h2>High-quality data.<br /><span>For smarter AI.</span></h2>
             </div>
-            <p className="heading-aside">A couple of example project stories to show the shape of our work. We’ll replace these with approved case studies and evidence.</p>
+            <p className="heading-aside">From language data collection and speech transcription to annotation and quality review, we adapt delivery to each project's languages, formats, and guidelines.</p>
           </div>
           <div className="project-grid">
             {projects.map((project, index) => (
