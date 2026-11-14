@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CareersHand from "./CareersHand.jsx";
+import ShareActions from "./ShareActions.jsx";
 import { readApiJson, VITE_API_URL } from "../apiConfig.js";
 
 function getOpenings(result) {
@@ -73,24 +74,30 @@ export default function CareersPage() {
         {!loading && !error && openings.length === 0 && (
           <p className="career-listing-message">There are no open positions right now. Please check back soon.</p>
         )}
-        {!loading && !error && openings.map((opening) => (
-          <article className="career-card" key={opening._id || opening.id || opening.title}>
-            <h2>{opening.title}</h2>
-            <div className="career-card-details">
-              {[opening.location, opening.employmentType, formatPrice(opening.price)]
-                .filter(Boolean)
-                .map((detail) => <span key={detail}>{detail}</span>)}
-            </div>
-            <div className="career-card-footer">
-              <Link
-                className="career-card-view"
-                to={`/careers/apply?job=${encodeURIComponent(opening.title)}&jobId=${encodeURIComponent(opening._id || opening.id || "")}`}
-              >
-                Apply
-              </Link>
-            </div>
-          </article>
-        ))}
+        {!loading && !error && openings.map((opening) => {
+          const jobId = opening._id || opening.id || "";
+          const applicationUrl = `/careers/apply?job=${encodeURIComponent(opening.title)}&jobId=${encodeURIComponent(jobId)}`;
+
+          return (
+            <article className="career-card" key={jobId || opening.title}>
+              <h2>{opening.title}</h2>
+              <div className="career-card-details">
+                {[opening.location, opening.employmentType, formatPrice(opening.price)]
+                  .filter(Boolean)
+                  .map((detail) => <span key={detail}>{detail}</span>)}
+              </div>
+              <div className="career-card-footer">
+                <ShareActions
+                  label="Share job"
+                  title={opening.title}
+                  text={`Explore this ${opening.title} opportunity at Datovia Playhouse.`}
+                  url={applicationUrl}
+                />
+                <Link className="career-card-view" to={applicationUrl}>Apply</Link>
+              </div>
+            </article>
+          );
+        })}
       </section>
     </main>
   );

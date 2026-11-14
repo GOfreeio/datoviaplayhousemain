@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
+import ShareActions from "./ShareActions.jsx";
 
 const blogPosts = [
   {
@@ -271,6 +272,11 @@ export default function BlogPage() {
           <p className="blog-article-category">{selectedPost.category}</p>
           <h1>{formatBlogTitle(selectedPost.title)}</h1>
           <p>{selectedPost.subtitle}</p>
+          <ShareActions
+            label="Share article"
+            title={selectedPost.title}
+            text={selectedPost.excerpt}
+          />
         </section>
         <article className="section-wrap blog-article-content">
           <img className="blog-article-image" src={selectedPost.image} alt={selectedPost.imageAlt} />

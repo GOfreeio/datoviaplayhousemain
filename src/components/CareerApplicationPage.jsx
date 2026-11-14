@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { VITE_API_URL, VITE_API_URL_REQUIRED_MESSAGE } from "../apiConfig.js";
+import ShareActions from "./ShareActions.jsx";
 
 const responsibilities = [
   "Listen to audio recordings and accurately transcribe spoken content into text, following project-specific formatting, punctuation, and grammar guidelines.",
@@ -302,6 +303,11 @@ export default function CareerApplicationPage() {
         <section className="careers-application" aria-labelledby="application-heading">
           <h2 id="application-heading">Apply for {jobTitle}</h2>
           <p className="career-form-intro">Tell us about your languages, experience, and project interests.</p>
+          <ShareActions
+            label="Share job"
+            title={jobTitle}
+            text={`Explore this ${jobTitle} opportunity at Datovia Playhouse.`}
+          />
           <form className="application-form" onSubmit={handleSubmit}>
             <div className="form-field">
               <label htmlFor="applicant-name">Full name</label>
